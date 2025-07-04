@@ -27,4 +27,5 @@ For guidance on configuring and using the plugin see the documentation page http
 ## Version history ##
 
     version         Description
+    1.1.0+20250704  Allow turnstile to be enabled for each subscribe page
     1.0.0+20250629  Initial release

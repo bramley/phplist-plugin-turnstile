@@ -1,3 +1,6 @@
+version 1.1.0+20250704
+      Allow turnstile to be enabled for each subscribe page
+
 version 1.0.0+20250629
       Initial file
 

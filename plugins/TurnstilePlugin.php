@@ -106,6 +106,46 @@ class TurnstilePlugin extends phplistPlugin
     }
 
     /**
+     * Provide html for the options when editing a subscribe page.
+     *
+     * @param array $pageData subscribe page fields
+     *
+     * @return string additional html
+     */
+    public function displaySubscribepageEdit($pageData)
+    {
+        $include = isset($pageData['turnstile_include']) ? (bool) $pageData['turnstile_include'] : true;
+        $html =
+            CHtml::label(s('Include turnstile widget in the subscribe page'), 'turnstile_include')
+            . CHtml::checkBox('turnstile_include', $include, ['value' => 1, 'uncheckValue' => 0]);
+
+        return $html;
+    }
+
+    /**
+     * Save the subscribe page settings.
+     *
+     * @param int $id subscribe page id
+     */
+    public function processSubscribePageEdit($id)
+    {
+        global $tables;
+
+        Sql_Query(
+            sprintf('
+                REPLACE INTO %s
+                (id, name, data)
+                VALUES
+                (%d, "turnstile_include", "%s")
+                ',
+                $tables['subscribepage_data'],
+                $id,
+                $_POST['turnstile_include']
+            )
+        );
+    }
+
+    /**
      * Provide the html to be included in a subscription page.
      *
      * @param array $pageData subscribe page fields
@@ -115,9 +155,12 @@ class TurnstilePlugin extends phplistPlugin
      */
     public function displaySubscriptionChoice($pageData, $userID = 0)
     {
-        if (!$this->keysEntered) {
+        if (!(($pageData['turnstile_include'] ?? true)
+            && $_GET['p'] == 'subscribe'
+            && $this->keysEntered)) {
             return '';
         }
+
         $format = <<<'END'
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
 <div class="cf-turnstile" data-sitekey="%s"></div>
@@ -136,7 +179,10 @@ END;
      */
     public function validateSubscriptionPage($pageData)
     {
-        if (empty($_POST) || $_GET['p'] != 'subscribe') {
+        if (!(($pageData['turnstile_include'] ?? true)
+            && isset($_POST)
+            && $_GET['p'] == 'subscribe'
+            && $this->keysEntered)) {
             return '';
         }
 
